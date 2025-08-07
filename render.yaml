@@ -3,7 +3,9 @@ services:
     name: synkr
     env: node
     buildCommand: npm run build
-    startCommand: npm start
+    startCommand: node server/index.js
     envVars:
       - key: NODE_VERSION
         value: 18.x
+      - key: NODE_ENV
+        value: production
