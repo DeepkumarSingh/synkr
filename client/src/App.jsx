@@ -17,6 +17,9 @@ const App = () => {
   const [copySuccess, setCopySuccess] = useState("");
   const [users, setUsers] = useState([]);
   const [typing, setTyping] = useState("");
+  const [output, setOutput] = useState("");
+  const [version, setVersion] = useState("*");
+
   useEffect(()=>{
     socket.on("userJoined", (users) => {
       setUsers(users);
@@ -33,11 +36,18 @@ const App = () => {
     socket.on("languageUpdate", (newLanguage) => {
       setLanguage(newLanguage);
     });
+
+    socket.on("codeResponse", (response) => {
+      setOutput(response.run.output);
+    });
+
+    //cleanup function to remove listeners
     return ()=>{
       socket.off("userJoined");
       socket.off("codeUpdate");
       socket.off("userTyping");
       socket.off("languageUpdate");
+      socket.off("codeResponse");
     };
   },[]);
 
@@ -85,6 +95,11 @@ const App = () => {
     setLanguage(newLanguage);
     socket.emit("languageChange", { roomId, language: newLanguage });
   }
+
+  const runCode = () =>{
+    socket.emit("compileCode", { code, roomId, language, version });
+  }
+
   if (!joined) {
     return <div className="join-container">
       <div className="join-form">
@@ -136,7 +151,7 @@ const App = () => {
     </div>
     <div className="editor-wrapper">
       <Editor
-        height={"100%"} 
+        height={"60%"} 
         defaultLanguage={language}
         language={language}
         value={code}
@@ -148,6 +163,12 @@ const App = () => {
             fontSize: 16,
           }
         }
+      />
+      <button className="run-btn" onClick={runCode}>Run Code</button>
+      <textarea className="output-area"
+        value={output}
+        readOnly
+        placeholder="Output will be displayed here"
       />
     </div>
   </div>
