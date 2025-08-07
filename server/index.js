@@ -4,10 +4,12 @@ import { Server } from "socket.io";
 import path from "path";
 import { version } from "os";
 import axios from "axios";
+
 const app = express();
 // app.get('/', (req, res) => {
 //     res.send('Server is running');
 // });
+
 const server = http.createServer(app);
 
 const url = `https://synkr-j0o6.onrender.com`;
@@ -16,8 +18,8 @@ const interval = 30000;
 function reloadWebsite() {
     axios
         .get(url)
-        .then((response) => {
-            console.log("website reloded");
+        .then(() => {
+            console.log("website reloaded");
         })
         .catch((error) => {
             console.error(`Error : ${error.message}`);
@@ -31,9 +33,12 @@ const io = new Server(server, {
         origin: "*",
     },
 });
+
 const rooms = new Map();
+
 io.on("connection", (socket) => {
     console.log("client connected ", socket.id);
+
     let currentRoom = null;
     let currentUser = null;
 
@@ -43,16 +48,23 @@ io.on("connection", (socket) => {
             rooms.get(currentRoom).delete(currentUser);
             io.to(currentRoom).emit("userJoined", Array.from(rooms.get(currentRoom)));
         }
+
         currentRoom = roomId;
         currentUser = userName;
         socket.join(roomId);
+
         if (!rooms.has(roomId)) {
             rooms.set(roomId, new Set());
         }
+
+        if (!(rooms.get(roomId) instanceof Set)) {
+            rooms.set(roomId, new Set());
+        }
+
         rooms.get(roomId).add(userName);
         io.to(roomId).emit("userJoined", Array.from(rooms.get(currentRoom)));
-        //console.log(`User ${userName} joined room ${roomId}`);
     });
+
     socket.on("codeChange", ({ roomId, code }) => {
         socket.to(roomId).emit("codeUpdate", code);
     });
@@ -67,9 +79,11 @@ io.on("connection", (socket) => {
             currentUser = null;
         }
     });
+
     socket.on("typing", ({ roomId, userName }) => {
         socket.to(roomId).emit("userTyping", userName);
     });
+
     socket.on("languageChange", ({ roomId, language }) => {
         io.to(roomId).emit("languageUpdate", language);
     });
@@ -93,6 +107,7 @@ io.on("connection", (socket) => {
             io.to(roomId).emit("codeResponse", response.data);
         }
     });
+
     socket.on("disconnect", () => {
         if (currentRoom && currentUser) {
             rooms.get(currentRoom).delete(currentUser);
