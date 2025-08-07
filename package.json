@@ -1,16 +1,15 @@
 {
-  "name": "synkr(new)",
+  "name": "synkr",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
     "build": "npm install && cd client && npm install && npm run build",
-    "render-build": "npm install && cd client && npm install && npm run build",
-    "render-start": "node server/index.js"
+    "postbuild": "cd client && npm run build"
   },
   "keywords": [],
   "author": "",

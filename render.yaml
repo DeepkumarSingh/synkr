@@ -2,10 +2,13 @@ services:
   - type: web
     name: synkr
     env: node
-    buildCommand: npm run build
-    startCommand: node server/index.js
+    buildCommand: npm install && npm run build
+    startCommand: cd $RENDER_PROJECT_DIR && node server/index.js
     envVars:
       - key: NODE_VERSION
         value: 18.x
       - key: NODE_ENV
         value: production
+    routes:
+      - type: web
+        plan: free
